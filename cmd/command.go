@@ -2,39 +2,15 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
-	"fnv3/test/filenetipfs"
-	"github.com/astaxie/beego/config"
 	"os"
+	"os/exec"
 	"strings"
 )
 
 var Chanl = make(chan int)
 
-func init() {
-	Filenet["Help"] = FilenetHelp
-	Filenet["Add"] = FilenetAdd
-	Filenet["get"] = FilenetGet
-	FilenetConfig, err := config.NewConfig("ini", "filnetipfs.config")
-	if err != nil {
-		panic(err)
-	}
-	InitIpfsPort(FilenetConfig)
-	port:="8081"
-	fmt.Println(FilenetConfig.Set("API::port",port))
-
-}
-
-
-func InitIpfsPort(con config.Configer) {
-	port := con.String("API::port")
-	filenetipfs.SetIpfsAddPath(port)
-	filenetipfs.SetIpfsLsPath(port)
-	filenetipfs.SetIpfsBlockRawPath(port)
-}
-
-
 func Command() {
+	os.Stdout.WriteString("filenet>")
 	for {
 		input := bufio.NewReader(os.Stdin)
 		args, _, _ := input.ReadLine()
@@ -46,20 +22,19 @@ func Command() {
 		switch comm[0] {
 		case "ipfs":
 			IPFSserver(comm[1:])
+			FilenetHeader(nil)
 		case "filenet":
 			FilenetServer(comm[1:])
+			FilenetHeader(nil)
 		case "bye":
 			FilenetExit(nil)
 		case "exit":
 			FilenetExit(nil)
 		default:
-			res:=fmt.Sprintf("%s\t%s",COMMANDNOTFOUND,comm[0])
-			os.Stderr.Write([]byte(res))
+			cmd := exec.Command("system", comm...)
+			cmd.Run()
+			FilenetHeader(nil)
 		}
 	}
 }
 
-func FilenetExit(args []string){
-	<-Chanl
-	return
-}
