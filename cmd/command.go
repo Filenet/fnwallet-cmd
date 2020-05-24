@@ -30,6 +30,8 @@ func Command() {
 			FilenetExit(nil)
 		case "exit":
 			FilenetExit(nil)
+		case "quit"
+			FilenetExit(nil)
 		default:
 			cmd := exec.Command("system", comm...)
 			cmd.Run()
